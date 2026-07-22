@@ -24,13 +24,46 @@
     color: var(--text);
     padding: 32px 20px 80px;
   }
-  .wrap { max-width: 880px; margin: 0 auto; }
+  .wrap { max-width: 980px; margin: 0 auto; }
   h1 { font-size: 22px; margin: 0 0 4px; }
-  .updated { color: var(--sub); font-size: 13px; margin-bottom: 28px; }
+  .updated { color: var(--sub); font-size: 13px; margin-bottom: 20px; }
+
+  .tab-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+  .tab-btn {
+    appearance: none;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    color: var(--sub);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    transform: translateY(1px);
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent);
+    background: var(--card-bg);
+    border-color: var(--border);
+    border-bottom: 1px solid var(--card-bg);
+  }
+
+  .product-panel { display: none; }
+  .product-panel.active { display: block; }
+
   .product-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 0 14px 14px 14px;
     padding: 20px 22px;
     margin-bottom: 20px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.03);
@@ -46,18 +79,31 @@
   .product-sub { font-size: 12.5px; color: var(--sub); line-height: 1.4; margin-bottom: 6px; }
   .product-link { font-size: 12.5px; color: var(--accent); text-decoration: none; }
   .product-link:hover { text-decoration: underline; }
-  .kw-table { display: flex; flex-direction: column; }
-  .kw-row {
-    display: grid;
-    grid-template-columns: 1.3fr 1.4fr 0.9fr 0.7fr;
-    align-items: center;
-    padding: 10px 0;
+
+  .table-wrap { overflow-x: auto; }
+  .kw-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .kw-table th, .kw-table td {
+    padding: 9px 10px;
     border-top: 1px solid var(--border);
-    font-size: 13.5px;
+    text-align: left;
+    white-space: nowrap;
   }
-  .kw-header { color: var(--sub); font-size: 12px; border-top: none; padding-top: 0; padding-bottom: 8px; }
+  .kw-table thead th {
+    border-top: none;
+    color: var(--sub);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .kw-table thead th.nosort { cursor: default; }
+  .kw-table thead th[data-sort]:hover { color: var(--text); }
+  .kw-table thead th.sort-asc::after { content: " ▲"; color: var(--accent); }
+  .kw-table thead th.sort-desc::after { content: " ▼"; color: var(--accent); }
   .kw-name { font-weight: 600; }
   .kw-rank { font-weight: 700; }
+  .kw-volume, .kw-count, .kw-ratio { color: var(--sub); font-size: 12.5px; }
   .delta { font-weight: 700; font-size: 12.5px; padding: 2px 7px; border-radius: 6px; }
   .delta.up { color: var(--up); background: rgba(26,158,92,0.1); }
   .delta.down { color: var(--down); background: rgba(224,51,79,0.1); }
@@ -69,85 +115,288 @@
 <body>
   <div class="wrap">
     <h1>ARX 네이버쇼핑 순위 추적기</h1>
-    <div class="updated">마지막 갱신: 2026-07-22 14:04 KST · 매일 자동 갱신(GitHub Actions)</div>
+    <div class="updated">마지막 갱신: 2026-07-22 15:02 KST · 매일 자동 갱신(GitHub Actions)</div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" data-product="ceramic">세라믹 (오닉스+제니스)</button><button class="tab-btn" data-product="verde">베르데 (증착)</button>
+    </div>
+
     
-        <div class="product-card">
-          <div class="product-head">
-            <div class="product-thumb">ARX</div>
-            <div class="product-info">
-              <div class="product-title">세라믹 (오닉스+제니스)</div>
-              <div class="product-sub">ARX 자동차 썬팅 필름 오닉스 제니스 국산 수입차 세라믹 열차단 틴팅 시공권</div>
-              <a class="product-link" href="https://smartstore.naver.com/vision03/products/13661072097" target="_blank">상품 페이지 열기 ↗</a>
+        <div class="product-panel active" id="panel-ceramic">
+          <div class="product-card">
+            <div class="product-head">
+              <div class="product-thumb">ARX</div>
+              <div class="product-info">
+                <div class="product-title">세라믹 (오닉스+제니스)</div>
+                <div class="product-sub">ARX 자동차 썬팅 필름 오닉스 제니스 국산 수입차 세라믹 열차단 틴팅 시공권</div>
+                <a class="product-link" href="https://smartstore.naver.com/vision03/products/13661072097" target="_blank">상품 페이지 열기 ↗</a>
+              </div>
             </div>
-          </div>
-          <div class="kw-table">
-            <div class="kw-row kw-header">
-              <div class="kw-name">키워드</div>
-              <div class="kw-spark">추이(최근 1회)</div>
-              <div class="kw-rank">현재 순위</div>
-              <div class="kw-delta">변동</div>
-            </div>
-            
-            <div class="kw-row">
-              <div class="kw-name">자동차 썬팅</div>
-              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
-              <div class="kw-rank">1000위 밖</div>
-              <div class="kw-delta"><span class="delta flat">-</span></div>
-            </div>
-            <div class="kw-row">
-              <div class="kw-name">자동차 썬팅 필름</div>
-              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
-              <div class="kw-rank">618위</div>
-              <div class="kw-delta"><span class="delta new">NEW</span></div>
-            </div>
-            <div class="kw-row">
-              <div class="kw-name">세라믹 틴팅</div>
-              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
-              <div class="kw-rank">5위</div>
-              <div class="kw-delta"><span class="delta new">NEW</span></div>
-            </div>
-            <div class="kw-row">
-              <div class="kw-name">세라믹 썬팅</div>
-              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
-              <div class="kw-rank">111위</div>
-              <div class="kw-delta"><span class="delta new">NEW</span></div>
-            </div>
-            <div class="kw-row">
-              <div class="kw-name">틴팅 시공권</div>
-              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
-              <div class="kw-rank">2위</div>
-              <div class="kw-delta"><span class="delta new">NEW</span></div>
-            </div>
-            <div class="kw-row">
-              <div class="kw-name">수입차 썬팅</div>
-              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
-              <div class="kw-rank">350위</div>
-              <div class="kw-delta"><span class="delta new">NEW</span></div>
-            </div>
-            <div class="kw-row">
-              <div class="kw-name">열차단 필름</div>
-              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
-              <div class="kw-rank">1000위 밖</div>
-              <div class="kw-delta"><span class="delta flat">-</span></div>
-            </div>
-            <div class="kw-row">
-              <div class="kw-name">썬팅 재시공</div>
-              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
-              <div class="kw-rank">1000위 밖</div>
-              <div class="kw-delta"><span class="delta flat">-</span></div>
-            </div>
-            <div class="kw-row">
-              <div class="kw-name">테슬라 썬팅</div>
-              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
-              <div class="kw-rank">1000위 밖</div>
-              <div class="kw-delta"><span class="delta flat">-</span></div>
+            <div class="table-wrap">
+              <table class="kw-table">
+                <thead>
+                  <tr>
+                    <th data-sort="name">키워드</th>
+                    <th class="nosort">추이(최근 1회)</th>
+                    <th data-sort="rank">현재 순위</th>
+                    <th data-sort="delta">변동</th>
+                    <th data-sort="volume">월검색량</th>
+                    <th data-sort="count">상품수</th>
+                    <th data-sort="ratio">경쟁강도</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+            <tr data-name="자동차 썬팅" data-rank="999999" data-delta="0"
+                data-volume="5080" data-count="147417" data-ratio="29.019094488188976">
+              <td class="kw-name">자동차 썬팅</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">1000위 밖</td>
+              <td class="kw-delta"><span class="delta flat">-</span></td>
+              <td class="kw-volume">5,080 (조사일 2026-07-20)</td>
+              <td class="kw-count">147,417</td>
+              <td class="kw-ratio">29.0</td>
+            </tr>
+            <tr data-name="자동차 썬팅 필름" data-rank="618" data-delta="0"
+                data-volume="1020" data-count="114024" data-ratio="111.78823529411764">
+              <td class="kw-name">자동차 썬팅 필름</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">618위</td>
+              <td class="kw-delta"><span class="delta new">NEW</span></td>
+              <td class="kw-volume">1,020 (조사일 2026-07-20)</td>
+              <td class="kw-count">114,024</td>
+              <td class="kw-ratio">111.8</td>
+            </tr>
+            <tr data-name="세라믹 틴팅" data-rank="5" data-delta="0"
+                data-volume="50" data-count="345" data-ratio="6.9">
+              <td class="kw-name">세라믹 틴팅</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">5위</td>
+              <td class="kw-delta"><span class="delta new">NEW</span></td>
+              <td class="kw-volume">50 (조사일 2026-07-20)</td>
+              <td class="kw-count">345</td>
+              <td class="kw-ratio">6.9</td>
+            </tr>
+            <tr data-name="세라믹 썬팅" data-rank="111" data-delta="0"
+                data-volume="40" data-count="3149" data-ratio="78.725">
+              <td class="kw-name">세라믹 썬팅</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">111위</td>
+              <td class="kw-delta"><span class="delta new">NEW</span></td>
+              <td class="kw-volume">40 (조사일 2026-07-20)</td>
+              <td class="kw-count">3,149</td>
+              <td class="kw-ratio">78.7</td>
+            </tr>
+            <tr data-name="틴팅 시공권" data-rank="2" data-delta="0"
+                data-volume="20" data-count="29" data-ratio="1.45">
+              <td class="kw-name">틴팅 시공권</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">2위</td>
+              <td class="kw-delta"><span class="delta new">NEW</span></td>
+              <td class="kw-volume">20 (조사일 2026-07-20)</td>
+              <td class="kw-count">29</td>
+              <td class="kw-ratio">1.4</td>
+            </tr>
+            <tr data-name="수입차 썬팅" data-rank="350" data-delta="0"
+                data-volume="40" data-count="572" data-ratio="14.3">
+              <td class="kw-name">수입차 썬팅</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">350위</td>
+              <td class="kw-delta"><span class="delta new">NEW</span></td>
+              <td class="kw-volume">40 (조사일 2026-07-20)</td>
+              <td class="kw-count">572</td>
+              <td class="kw-ratio">14.3</td>
+            </tr>
+            <tr data-name="열차단 필름" data-rank="999999" data-delta="0"
+                data-volume="2180" data-count="62349" data-ratio="28.60045871559633">
+              <td class="kw-name">열차단 필름</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">1000위 밖</td>
+              <td class="kw-delta"><span class="delta flat">-</span></td>
+              <td class="kw-volume">2,180 (조사일 2026-07-20)</td>
+              <td class="kw-count">62,349</td>
+              <td class="kw-ratio">28.6</td>
+            </tr>
+            <tr data-name="썬팅 재시공" data-rank="999999" data-delta="0"
+                data-volume="520" data-count="236" data-ratio="0.45384615384615384">
+              <td class="kw-name">썬팅 재시공</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">1000위 밖</td>
+              <td class="kw-delta"><span class="delta flat">-</span></td>
+              <td class="kw-volume">520 (조사일 2026-07-20)</td>
+              <td class="kw-count">236</td>
+              <td class="kw-ratio">0.5</td>
+            </tr>
+            <tr data-name="테슬라 썬팅" data-rank="999999" data-delta="0"
+                data-volume="1580" data-count="1261" data-ratio="0.7981012658227848">
+              <td class="kw-name">테슬라 썬팅</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">1000위 밖</td>
+              <td class="kw-delta"><span class="delta flat">-</span></td>
+              <td class="kw-volume">1,580 (조사일 2026-07-20)</td>
+              <td class="kw-count">1,261</td>
+              <td class="kw-ratio">0.8</td>
+            </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
+        <div class="product-panel" id="panel-verde">
+          <div class="product-card">
+            <div class="product-head">
+              <div class="product-thumb">ARX</div>
+              <div class="product-info">
+                <div class="product-title">베르데 (증착)</div>
+                <div class="product-sub">ARX 자동차 썬팅 필름 베르데 국산 수입차 반사 증착 열차단 미러틴팅 시공권</div>
+                <a class="product-link" href="https://smartstore.naver.com/vision03/products/13665232700" target="_blank">상품 페이지 열기 ↗</a>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="kw-table">
+                <thead>
+                  <tr>
+                    <th data-sort="name">키워드</th>
+                    <th class="nosort">추이(최근 1회)</th>
+                    <th data-sort="rank">현재 순위</th>
+                    <th data-sort="delta">변동</th>
+                    <th data-sort="volume">월검색량</th>
+                    <th data-sort="count">상품수</th>
+                    <th data-sort="ratio">경쟁강도</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+            <tr data-name="반사 썬팅" data-rank="999999" data-delta="0"
+                data-volume="940" data-count="8150" data-ratio="8.670212765957446">
+              <td class="kw-name">반사 썬팅</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">1000위 밖</td>
+              <td class="kw-delta"><span class="delta flat">-</span></td>
+              <td class="kw-volume">940 (조사일 2026-07-20)</td>
+              <td class="kw-count">8,150</td>
+              <td class="kw-ratio">8.7</td>
+            </tr>
+            <tr data-name="증착 필름" data-rank="71" data-delta="0"
+                data-volume="60" data-count="254" data-ratio="4.233333333333333">
+              <td class="kw-name">증착 필름</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">71위</td>
+              <td class="kw-delta"><span class="delta new">NEW</span></td>
+              <td class="kw-volume">60 (조사일 2026-07-20)</td>
+              <td class="kw-count">254</td>
+              <td class="kw-ratio">4.2</td>
+            </tr>
+            <tr data-name="수입차 썬팅" data-rank="347" data-delta="0"
+                data-volume="40" data-count="572" data-ratio="14.3">
+              <td class="kw-name">수입차 썬팅</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">347위</td>
+              <td class="kw-delta"><span class="delta new">NEW</span></td>
+              <td class="kw-volume">40 (조사일 2026-07-20)</td>
+              <td class="kw-count">572</td>
+              <td class="kw-ratio">14.3</td>
+            </tr>
+            <tr data-name="열차단 필름" data-rank="999999" data-delta="0"
+                data-volume="2180" data-count="62349" data-ratio="28.60045871559633">
+              <td class="kw-name">열차단 필름</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">1000위 밖</td>
+              <td class="kw-delta"><span class="delta flat">-</span></td>
+              <td class="kw-volume">2,180 (조사일 2026-07-20)</td>
+              <td class="kw-count">62,349</td>
+              <td class="kw-ratio">28.6</td>
+            </tr>
+            <tr data-name="자동차 썬팅" data-rank="999999" data-delta="0"
+                data-volume="5080" data-count="147417" data-ratio="29.019094488188976">
+              <td class="kw-name">자동차 썬팅</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">1000위 밖</td>
+              <td class="kw-delta"><span class="delta flat">-</span></td>
+              <td class="kw-volume">5,080 (조사일 2026-07-20)</td>
+              <td class="kw-count">147,417</td>
+              <td class="kw-ratio">29.0</td>
+            </tr>
+            <tr data-name="썬팅 재시공" data-rank="999999" data-delta="0"
+                data-volume="520" data-count="236" data-ratio="0.45384615384615384">
+              <td class="kw-name">썬팅 재시공</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">1000위 밖</td>
+              <td class="kw-delta"><span class="delta flat">-</span></td>
+              <td class="kw-volume">520 (조사일 2026-07-20)</td>
+              <td class="kw-count">236</td>
+              <td class="kw-ratio">0.5</td>
+            </tr>
+            <tr data-name="테슬라 썬팅" data-rank="999999" data-delta="0"
+                data-volume="1580" data-count="1261" data-ratio="0.7981012658227848">
+              <td class="kw-name">테슬라 썬팅</td>
+              <td class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></td>
+              <td class="kw-rank">1000위 밖</td>
+              <td class="kw-delta"><span class="delta flat">-</span></td>
+              <td class="kw-volume">1,580 (조사일 2026-07-20)</td>
+              <td class="kw-count">1,261</td>
+              <td class="kw-ratio">0.8</td>
+            </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
     <div class="footer-note">
-      순위는 네이버 검색 오픈API(쇼핑) 기준 근사치이며, 실제 소비자 화면과 개인화 등으로 다를 수 있습니다.
-      최대 1000위까지 조회되며 "1000위 밖"은 해당 범위 안에서 상품을 찾지 못했다는 뜻입니다.
+      순위·상품수는 네이버 검색 오픈API(쇼핑) 기준 근사치이며 매일 자동 갱신됩니다. 실제 소비자 화면과
+      개인화 등으로 다를 수 있습니다. 최대 1000위까지 조회되며 "1000위 밖"은 해당 범위 안에서 상품을
+      찾지 못했다는 뜻입니다. 월검색량은 네이버 검색광고 데이터를 수동으로 격주 입력한 값이며(자동
+      갱신 아님), 경쟁강도 = 오늘의 상품수 ÷ 월검색량 입니다. 같은 키워드가 여러 상품에 걸쳐 있는 경우
+      (예: "자동차 썬팅") 각 상품 탭에 동일하게 표시되며, 순위는 각 상품 기준으로 별도 계산됩니다.
+      표 머리글을 클릭하면 오름차순/내림차순으로 정렬됩니다.
     </div>
   </div>
+
+<script>
+(function() {
+  // 탭 전환
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.product-panel').forEach(function(p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      var panel = document.getElementById('panel-' + btn.dataset.product);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  // 표 정렬
+  document.querySelectorAll('.kw-table thead th[data-sort]').forEach(function(th) {
+    th.addEventListener('click', function() {
+      var table = th.closest('table');
+      var key = th.dataset.sort;
+      var tbody = table.querySelector('tbody');
+      var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+      var asc = th.dataset.dir !== 'asc';
+
+      table.querySelectorAll('th[data-sort]').forEach(function(h) {
+        h.removeAttribute('data-dir');
+        h.classList.remove('sort-asc', 'sort-desc');
+      });
+      th.dataset.dir = asc ? 'asc' : 'desc';
+      th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+
+      rows.sort(function(a, b) {
+        var va = a.dataset[key];
+        var vb = b.dataset[key];
+        if (key === 'name') {
+          return asc ? va.localeCompare(vb, 'ko') : vb.localeCompare(va, 'ko');
+        }
+        va = parseFloat(va);
+        vb = parseFloat(vb);
+        return asc ? va - vb : vb - va;
+      });
+
+      rows.forEach(function(r) { tbody.appendChild(r); });
+    });
+  });
+})();
+</script>
 </body>
 </html>
