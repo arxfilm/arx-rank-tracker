@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARX 네이버쇼핑 순위 추적기</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --border: #e3e5e9;
+    --text: #1a1d23;
+    --sub: #767c88;
+    --up: #1a9e5c;
+    --down: #e0334f;
+    --flat: #9aa0ab;
+    --accent: #2a5bd7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 20px 80px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .updated { color: var(--sub); font-size: 13px; margin-bottom: 28px; }
+  .product-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .product-head { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
+  .product-thumb {
+    width: 52px; height: 52px; border-radius: 10px;
+    background: linear-gradient(135deg,#2a2f3a,#4a5568);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; letter-spacing: 0.5px; flex-shrink: 0;
+  }
+  .product-title { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .product-sub { font-size: 12.5px; color: var(--sub); line-height: 1.4; margin-bottom: 6px; }
+  .product-link { font-size: 12.5px; color: var(--accent); text-decoration: none; }
+  .product-link:hover { text-decoration: underline; }
+  .kw-table { display: flex; flex-direction: column; }
+  .kw-row {
+    display: grid;
+    grid-template-columns: 1.3fr 1.4fr 0.9fr 0.7fr;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+    font-size: 13.5px;
+  }
+  .kw-header { color: var(--sub); font-size: 12px; border-top: none; padding-top: 0; padding-bottom: 8px; }
+  .kw-name { font-weight: 600; }
+  .kw-rank { font-weight: 700; }
+  .delta { font-weight: 700; font-size: 12.5px; padding: 2px 7px; border-radius: 6px; }
+  .delta.up { color: var(--up); background: rgba(26,158,92,0.1); }
+  .delta.down { color: var(--down); background: rgba(224,51,79,0.1); }
+  .delta.flat { color: var(--flat); background: rgba(154,160,171,0.12); }
+  .delta.new { color: var(--accent); background: rgba(42,91,215,0.1); }
+  .footer-note { color: var(--sub); font-size: 12px; margin-top: 24px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>ARX 네이버쇼핑 순위 추적기</h1>
+    <div class="updated">마지막 갱신: 2026-07-22 14:04 KST · 매일 자동 갱신(GitHub Actions)</div>
+    
+        <div class="product-card">
+          <div class="product-head">
+            <div class="product-thumb">ARX</div>
+            <div class="product-info">
+              <div class="product-title">세라믹 (오닉스+제니스)</div>
+              <div class="product-sub">ARX 자동차 썬팅 필름 오닉스 제니스 국산 수입차 세라믹 열차단 틴팅 시공권</div>
+              <a class="product-link" href="https://smartstore.naver.com/vision03/products/13661072097" target="_blank">상품 페이지 열기 ↗</a>
+            </div>
+          </div>
+          <div class="kw-table">
+            <div class="kw-row kw-header">
+              <div class="kw-name">키워드</div>
+              <div class="kw-spark">추이(최근 1회)</div>
+              <div class="kw-rank">현재 순위</div>
+              <div class="kw-delta">변동</div>
+            </div>
+            
+            <div class="kw-row">
+              <div class="kw-name">자동차 썬팅</div>
+              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
+              <div class="kw-rank">1000위 밖</div>
+              <div class="kw-delta"><span class="delta flat">-</span></div>
+            </div>
+            <div class="kw-row">
+              <div class="kw-name">자동차 썬팅 필름</div>
+              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
+              <div class="kw-rank">618위</div>
+              <div class="kw-delta"><span class="delta new">NEW</span></div>
+            </div>
+            <div class="kw-row">
+              <div class="kw-name">세라믹 틴팅</div>
+              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
+              <div class="kw-rank">5위</div>
+              <div class="kw-delta"><span class="delta new">NEW</span></div>
+            </div>
+            <div class="kw-row">
+              <div class="kw-name">세라믹 썬팅</div>
+              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
+              <div class="kw-rank">111위</div>
+              <div class="kw-delta"><span class="delta new">NEW</span></div>
+            </div>
+            <div class="kw-row">
+              <div class="kw-name">틴팅 시공권</div>
+              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
+              <div class="kw-rank">2위</div>
+              <div class="kw-delta"><span class="delta new">NEW</span></div>
+            </div>
+            <div class="kw-row">
+              <div class="kw-name">수입차 썬팅</div>
+              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
+              <div class="kw-rank">350위</div>
+              <div class="kw-delta"><span class="delta new">NEW</span></div>
+            </div>
+            <div class="kw-row">
+              <div class="kw-name">열차단 필름</div>
+              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
+              <div class="kw-rank">1000위 밖</div>
+              <div class="kw-delta"><span class="delta flat">-</span></div>
+            </div>
+            <div class="kw-row">
+              <div class="kw-name">썬팅 재시공</div>
+              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
+              <div class="kw-rank">1000위 밖</div>
+              <div class="kw-delta"><span class="delta flat">-</span></div>
+            </div>
+            <div class="kw-row">
+              <div class="kw-name">테슬라 썬팅</div>
+              <div class="kw-spark"><span style="color:#c2c6cc;font-size:11px;">데이터 누적중</span></div>
+              <div class="kw-rank">1000위 밖</div>
+              <div class="kw-delta"><span class="delta flat">-</span></div>
+            </div>
+          </div>
+        </div>
+    <div class="footer-note">
+      순위는 네이버 검색 오픈API(쇼핑) 기준 근사치이며, 실제 소비자 화면과 개인화 등으로 다를 수 있습니다.
+      최대 1000위까지 조회되며 "1000위 밖"은 해당 범위 안에서 상품을 찾지 못했다는 뜻입니다.
+    </div>
+  </div>
+</body>
+</html>
