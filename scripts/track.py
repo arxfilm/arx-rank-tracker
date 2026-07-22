@@ -25,6 +25,7 @@ OUTPUT_HTML = os.path.join(BASE_DIR, "index.html")
 
 MAX_SCAN = 1000  # 네이버 오픈API가 조회 가능한 최대 순위 범위
 PAGE_SIZE = 100
+RANK_SENTINEL = 999999  # "1000위 밖"을 정렬 시 항상 맨 뒤로 보내기 위한 값
 
 
 def api_search(client_id, client_secret, query, start):
@@ -90,11 +91,21 @@ def main():
 
     history.setdefault(today, {})
 
+    # 같은 키워드가 여러 상품에 걸쳐 등록돼 있을 수 있으므로(예: "자동차 썬팅"이
+    # 세라믹/베르데 둘 다에 있음) product_id 기준으로 캐시해서 API 중복 호출을 줄인다.
+    cache = {}
+
     for product in config["products"]:
         pid = product["id"]
         history[today].setdefault(pid, {})
-        for kw in product["keywords"]:
-            result = get_rank(client_id, client_secret, kw, product["product_id"])
+        for kw_entry in product["keywords"]:
+            kw = kw_entry["keyword"] if isinstance(kw_entry, dict) else kw_entry
+            cache_key = (kw, product["product_id"])
+            if cache_key in cache:
+                result = cache[cache_key]
+            else:
+                result = get_rank(client_id, client_secret, kw, product["product_id"])
+                cache[cache_key] = result
             history[today][pid][kw] = result
             print(f"[{pid}] {kw} -> {result}")
 
@@ -109,67 +120,120 @@ def render_html(config, history, time_str):
     dates = sorted(history.keys())
     latest = dates[-1]
     prev = dates[-2] if len(dates) >= 2 else None
+    recent_dates = dates[-14:]
 
-    products_html = []
-    for product in config["products"]:
+    tabs_html = []
+    panels_html = []
+
+    for idx, product in enumerate(config["products"]):
         pid = product["id"]
+        active = " active" if idx == 0 else ""
+
+        tabs_html.append(
+            f'<button class="tab-btn{active}" data-product="{escape_html(pid)}">'
+            f'{escape_html(product["label"])}</button>'
+        )
+
         rows_html = []
-        for kw in product["keywords"]:
+        for kw_entry in product["keywords"]:
+            if isinstance(kw_entry, dict):
+                kw = kw_entry["keyword"]
+                monthly_volume = kw_entry.get("monthly_volume")
+                volume_updated = kw_entry.get("volume_updated")
+            else:
+                kw = kw_entry
+                monthly_volume = None
+                volume_updated = None
+
             cur = history[latest].get(pid, {}).get(kw, {})
             cur_rank = cur.get("rank")
+            product_count = cur.get("total")  # 오늘 기준 상품수 (API에서 자동으로 매일 갱신)
             prev_rank = None
             if prev:
                 prev_rank = history[prev].get(pid, {}).get(kw, {}).get("rank")
 
             if cur_rank is not None:
                 rank_display = f"{cur_rank}위"
+                rank_sort = cur_rank
             else:
                 rank_display = "1000위 밖"
+                rank_sort = RANK_SENTINEL
 
             delta_html = '<span class="delta flat">-</span>'
+            delta_sort = 0
             if cur_rank is not None and prev_rank is not None:
                 diff = prev_rank - cur_rank  # 양수 = 순위 상승(더 앞으로)
+                delta_sort = diff
                 if diff > 0:
                     delta_html = f'<span class="delta up">▲{diff}</span>'
                 elif diff < 0:
                     delta_html = f'<span class="delta down">▼{abs(diff)}</span>'
             elif cur_rank is not None and prev is None:
                 delta_html = '<span class="delta new">NEW</span>'
+                delta_sort = 0
 
             # 최근 최대 14개 기록으로 스파크라인
-            recent_dates = dates[-14:]
             spark_points = []
             for d in recent_dates:
                 r = history[d].get(pid, {}).get(kw, {}).get("rank")
                 spark_points.append(r)
             spark_svg = render_sparkline(spark_points)
 
-            rows_html.append(f"""
-            <div class="kw-row">
-              <div class="kw-name">{escape_html(kw)}</div>
-              <div class="kw-spark">{spark_svg}</div>
-              <div class="kw-rank">{rank_display}</div>
-              <div class="kw-delta">{delta_html}</div>
-            </div>""")
+            # 월검색량(수동, 격주 갱신) · 상품수(자동, 매일) · 경쟁강도(=상품수/월검색량)
+            volume_display = f"{monthly_volume:,}" if monthly_volume else "-"
+            volume_sort = monthly_volume if monthly_volume else -1
+            count_display = f"{product_count:,}" if product_count is not None else "-"
+            count_sort = product_count if product_count is not None else -1
+            if monthly_volume and product_count is not None and monthly_volume > 0:
+                ratio = product_count / monthly_volume
+                ratio_display = f"{ratio:,.1f}"
+                ratio_sort = ratio
+            else:
+                ratio_display = "-"
+                ratio_sort = -1
+            volume_note = f" (조사일 {escape_html(volume_updated)})" if volume_updated else ""
 
-        products_html.append(f"""
-        <div class="product-card">
-          <div class="product-head">
-            <div class="product-thumb">ARX</div>
-            <div class="product-info">
-              <div class="product-title">{escape_html(product['label'])}</div>
-              <div class="product-sub">{escape_html(product['product_title'])}</div>
-              <a class="product-link" href="{escape_html(product['product_url'])}" target="_blank">상품 페이지 열기 ↗</a>
+            rows_html.append(f"""
+            <tr data-name="{escape_html(kw)}" data-rank="{rank_sort}" data-delta="{delta_sort}"
+                data-volume="{volume_sort}" data-count="{count_sort}" data-ratio="{ratio_sort}">
+              <td class="kw-name">{escape_html(kw)}</td>
+              <td class="kw-spark">{spark_svg}</td>
+              <td class="kw-rank">{rank_display}</td>
+              <td class="kw-delta">{delta_html}</td>
+              <td class="kw-volume">{volume_display}{volume_note}</td>
+              <td class="kw-count">{count_display}</td>
+              <td class="kw-ratio">{ratio_display}</td>
+            </tr>""")
+
+        panels_html.append(f"""
+        <div class="product-panel{active}" id="panel-{escape_html(pid)}">
+          <div class="product-card">
+            <div class="product-head">
+              <div class="product-thumb">ARX</div>
+              <div class="product-info">
+                <div class="product-title">{escape_html(product['label'])}</div>
+                <div class="product-sub">{escape_html(product['product_title'])}</div>
+                <a class="product-link" href="{escape_html(product['product_url'])}" target="_blank">상품 페이지 열기 ↗</a>
+              </div>
             </div>
-          </div>
-          <div class="kw-table">
-            <div class="kw-row kw-header">
-              <div class="kw-name">키워드</div>
-              <div class="kw-spark">추이(최근 {len(recent_dates)}회)</div>
-              <div class="kw-rank">현재 순위</div>
-              <div class="kw-delta">변동</div>
+            <div class="table-wrap">
+              <table class="kw-table">
+                <thead>
+                  <tr>
+                    <th data-sort="name">키워드</th>
+                    <th class="nosort">추이(최근 {len(recent_dates)}회)</th>
+                    <th data-sort="rank">현재 순위</th>
+                    <th data-sort="delta">변동</th>
+                    <th data-sort="volume">월검색량</th>
+                    <th data-sort="count">상품수</th>
+                    <th data-sort="ratio">경쟁강도</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {''.join(rows_html)}
+                </tbody>
+              </table>
             </div>
-            {''.join(rows_html)}
           </div>
         </div>""")
 
@@ -199,13 +263,46 @@ def render_html(config, history, time_str):
     color: var(--text);
     padding: 32px 20px 80px;
   }}
-  .wrap {{ max-width: 880px; margin: 0 auto; }}
+  .wrap {{ max-width: 980px; margin: 0 auto; }}
   h1 {{ font-size: 22px; margin: 0 0 4px; }}
-  .updated {{ color: var(--sub); font-size: 13px; margin-bottom: 28px; }}
+  .updated {{ color: var(--sub); font-size: 13px; margin-bottom: 20px; }}
+
+  .tab-bar {{
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }}
+  .tab-btn {{
+    appearance: none;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    color: var(--sub);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    transform: translateY(1px);
+  }}
+  .tab-btn:hover {{ color: var(--text); }}
+  .tab-btn.active {{
+    color: var(--accent);
+    background: var(--card-bg);
+    border-color: var(--border);
+    border-bottom: 1px solid var(--card-bg);
+  }}
+
+  .product-panel {{ display: none; }}
+  .product-panel.active {{ display: block; }}
+
   .product-card {{
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 0 14px 14px 14px;
     padding: 20px 22px;
     margin-bottom: 20px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.03);
@@ -221,18 +318,31 @@ def render_html(config, history, time_str):
   .product-sub {{ font-size: 12.5px; color: var(--sub); line-height: 1.4; margin-bottom: 6px; }}
   .product-link {{ font-size: 12.5px; color: var(--accent); text-decoration: none; }}
   .product-link:hover {{ text-decoration: underline; }}
-  .kw-table {{ display: flex; flex-direction: column; }}
-  .kw-row {{
-    display: grid;
-    grid-template-columns: 1.3fr 1.4fr 0.9fr 0.7fr;
-    align-items: center;
-    padding: 10px 0;
+
+  .table-wrap {{ overflow-x: auto; }}
+  .kw-table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
+  .kw-table th, .kw-table td {{
+    padding: 9px 10px;
     border-top: 1px solid var(--border);
-    font-size: 13.5px;
+    text-align: left;
+    white-space: nowrap;
   }}
-  .kw-header {{ color: var(--sub); font-size: 12px; border-top: none; padding-top: 0; padding-bottom: 8px; }}
+  .kw-table thead th {{
+    border-top: none;
+    color: var(--sub);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+  }}
+  .kw-table thead th.nosort {{ cursor: default; }}
+  .kw-table thead th[data-sort]:hover {{ color: var(--text); }}
+  .kw-table thead th.sort-asc::after {{ content: " ▲"; color: var(--accent); }}
+  .kw-table thead th.sort-desc::after {{ content: " ▼"; color: var(--accent); }}
   .kw-name {{ font-weight: 600; }}
   .kw-rank {{ font-weight: 700; }}
+  .kw-volume, .kw-count, .kw-ratio {{ color: var(--sub); font-size: 12.5px; }}
   .delta {{ font-weight: 700; font-size: 12.5px; padding: 2px 7px; border-radius: 6px; }}
   .delta.up {{ color: var(--up); background: rgba(26,158,92,0.1); }}
   .delta.down {{ color: var(--down); background: rgba(224,51,79,0.1); }}
@@ -245,12 +355,68 @@ def render_html(config, history, time_str):
   <div class="wrap">
     <h1>ARX 네이버쇼핑 순위 추적기</h1>
     <div class="updated">마지막 갱신: {time_str} · 매일 자동 갱신(GitHub Actions)</div>
-    {''.join(products_html)}
+
+    <div class="tab-bar">
+      {''.join(tabs_html)}
+    </div>
+
+    {''.join(panels_html)}
+
     <div class="footer-note">
-      순위는 네이버 검색 오픈API(쇼핑) 기준 근사치이며, 실제 소비자 화면과 개인화 등으로 다를 수 있습니다.
-      최대 1000위까지 조회되며 "1000위 밖"은 해당 범위 안에서 상품을 찾지 못했다는 뜻입니다.
+      순위·상품수는 네이버 검색 오픈API(쇼핑) 기준 근사치이며 매일 자동 갱신됩니다. 실제 소비자 화면과
+      개인화 등으로 다를 수 있습니다. 최대 1000위까지 조회되며 "1000위 밖"은 해당 범위 안에서 상품을
+      찾지 못했다는 뜻입니다. 월검색량은 네이버 검색광고 데이터를 수동으로 격주 입력한 값이며(자동
+      갱신 아님), 경쟁강도 = 오늘의 상품수 ÷ 월검색량 입니다. 같은 키워드가 여러 상품에 걸쳐 있는 경우
+      (예: "자동차 썬팅") 각 상품 탭에 동일하게 표시되며, 순위는 각 상품 기준으로 별도 계산됩니다.
+      표 머리글을 클릭하면 오름차순/내림차순으로 정렬됩니다.
     </div>
   </div>
+
+<script>
+(function() {{
+  // 탭 전환
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {{
+    btn.addEventListener('click', function() {{
+      document.querySelectorAll('.tab-btn').forEach(function(b) {{ b.classList.remove('active'); }});
+      document.querySelectorAll('.product-panel').forEach(function(p) {{ p.classList.remove('active'); }});
+      btn.classList.add('active');
+      var panel = document.getElementById('panel-' + btn.dataset.product);
+      if (panel) panel.classList.add('active');
+    }});
+  }});
+
+  // 표 정렬
+  document.querySelectorAll('.kw-table thead th[data-sort]').forEach(function(th) {{
+    th.addEventListener('click', function() {{
+      var table = th.closest('table');
+      var key = th.dataset.sort;
+      var tbody = table.querySelector('tbody');
+      var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+      var asc = th.dataset.dir !== 'asc';
+
+      table.querySelectorAll('th[data-sort]').forEach(function(h) {{
+        h.removeAttribute('data-dir');
+        h.classList.remove('sort-asc', 'sort-desc');
+      }});
+      th.dataset.dir = asc ? 'asc' : 'desc';
+      th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+
+      rows.sort(function(a, b) {{
+        var va = a.dataset[key];
+        var vb = b.dataset[key];
+        if (key === 'name') {{
+          return asc ? va.localeCompare(vb, 'ko') : vb.localeCompare(va, 'ko');
+        }}
+        va = parseFloat(va);
+        vb = parseFloat(vb);
+        return asc ? va - vb : vb - va;
+      }});
+
+      rows.forEach(function(r) {{ tbody.appendChild(r); }});
+    }});
+  }});
+}})();
+</script>
 </body>
 </html>"""
 
