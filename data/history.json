@@ -703,5 +703,146 @@
         "error": null
       }
     }
+  },
+  "2026-07-27": {
+    "ceramic": {
+      "자동차 썬팅": {
+        "rank": null,
+        "total": 151860,
+        "error": null
+      },
+      "자동차 썬팅 필름": {
+        "rank": 619,
+        "total": 118452,
+        "error": null
+      },
+      "세라믹 틴팅": {
+        "rank": 5,
+        "total": 351,
+        "error": null
+      },
+      "세라믹 썬팅": {
+        "rank": 110,
+        "total": 3146,
+        "error": null
+      },
+      "틴팅 시공권": {
+        "rank": 1,
+        "total": 29,
+        "error": null
+      },
+      "썬팅 시공권": {
+        "rank": 9,
+        "total": 51,
+        "error": null
+      },
+      "썬팅 시공": {
+        "rank": null,
+        "total": 15623,
+        "error": null
+      },
+      "수입차 썬팅 시공": {
+        "rank": null,
+        "total": 54,
+        "error": null
+      },
+      "수입차 썬팅": {
+        "rank": 356,
+        "total": 597,
+        "error": null
+      },
+      "열차단 필름": {
+        "rank": null,
+        "total": 66819,
+        "error": null
+      },
+      "썬팅 재시공": {
+        "rank": null,
+        "total": 274,
+        "error": null
+      },
+      "테슬라 썬팅": {
+        "rank": null,
+        "total": 1351,
+        "error": null
+      }
+    },
+    "verde": {
+      "반사 썬팅": {
+        "rank": null,
+        "total": 8453,
+        "error": null
+      },
+      "증착 필름": {
+        "rank": 69,
+        "total": 277,
+        "error": null
+      },
+      "빛반사 썬팅": {
+        "rank": null,
+        "total": 748,
+        "error": null
+      },
+      "블랙반사썬팅": {
+        "rank": null,
+        "total": 882,
+        "error": null
+      },
+      "반사썬팅농도": {
+        "rank": null,
+        "total": 123,
+        "error": null
+      },
+      "자동차 썬팅 필름": {
+        "rank": 616,
+        "total": 118452,
+        "error": null
+      },
+      "틴팅 시공권": {
+        "rank": 2,
+        "total": 29,
+        "error": null
+      },
+      "썬팅 시공권": {
+        "rank": 8,
+        "total": 51,
+        "error": null
+      },
+      "썬팅 시공": {
+        "rank": null,
+        "total": 15623,
+        "error": null
+      },
+      "수입차 썬팅 시공": {
+        "rank": null,
+        "total": 54,
+        "error": null
+      },
+      "수입차 썬팅": {
+        "rank": 353,
+        "total": 597,
+        "error": null
+      },
+      "열차단 필름": {
+        "rank": null,
+        "total": 66819,
+        "error": null
+      },
+      "자동차 썬팅": {
+        "rank": null,
+        "total": 151860,
+        "error": null
+      },
+      "썬팅 재시공": {
+        "rank": null,
+        "total": 274,
+        "error": null
+      },
+      "테슬라 썬팅": {
+        "rank": null,
+        "total": 1351,
+        "error": null
+      }
+    }
   }
 }
